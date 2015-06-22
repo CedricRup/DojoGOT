@@ -1,0 +1,9 @@
+c:\documents\s612340\Documents\Visual Studio 2013\Projects\DojoGOT\GOT.Specs\bin\Debug\GOT.Specs.dll.config
+c:\documents\s612340\Documents\Visual Studio 2013\Projects\DojoGOT\GOT.Specs\bin\Debug\GOT.Specs.dll
+c:\documents\s612340\Documents\Visual Studio 2013\Projects\DojoGOT\GOT.Specs\bin\Debug\GOT.Specs.pdb
+c:\documents\s612340\Documents\Visual Studio 2013\Projects\DojoGOT\GOT.Specs\bin\Debug\nunit.framework.dll
+c:\documents\s612340\Documents\Visual Studio 2013\Projects\DojoGOT\GOT.Specs\bin\Debug\TechTalk.SpecFlow.dll
+c:\documents\s612340\Documents\Visual Studio 2013\Projects\DojoGOT\GOT.Specs\bin\Debug\nunit.framework.xml
+c:\documents\s612340\Documents\Visual Studio 2013\Projects\DojoGOT\GOT.Specs\obj\Debug\GOT.Specs.csprojResolveAssemblyReference.cache
+c:\documents\s612340\Documents\Visual Studio 2013\Projects\DojoGOT\GOT.Specs\obj\Debug\GOT.Specs.dll
+c:\documents\s612340\Documents\Visual Studio 2013\Projects\DojoGOT\GOT.Specs\obj\Debug\GOT.Specs.pdb

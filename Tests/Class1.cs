@@ -92,18 +92,24 @@ namespace Tests
 
             var reductionnables = valeurs.Count(v => v >= 1);
 
+            var total = 0m;
             var taux = 1m;
             switch (reductionnables)
             {
+                case 1:
+                    total += taux * 8;
+                    break;
                 case 2:
                     taux = 0.95m;
+                    total += 2*taux*8;
                     break;
                 case 3:
                     taux = 0.90m;
+                    total += 3*taux*8;
                     break;
             }
 
-            return valeurs.Sum()*8*taux;
+            return total;
         }
     }
 }

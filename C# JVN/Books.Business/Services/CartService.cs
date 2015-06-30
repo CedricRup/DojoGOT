@@ -50,7 +50,7 @@ namespace Books.Business.Services
         }
 
         /// <summary>
-        /// The get total.
+        /// The get total. what ?
         /// </summary>
         /// <returns>
         /// The <see cref="CartPrice"/>.

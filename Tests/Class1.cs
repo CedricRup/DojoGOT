@@ -88,27 +88,36 @@ namespace Tests
 
         public decimal CalculerTotal()
         {
-            var valeurs = Quantites.Select(kv => kv.Value).ToList();
-
-            var reductionnables = valeurs.Count(v => v >= 1);
+           
 
             var total = 0m;
-            var taux = 1m;
-            switch (reductionnables)
+            while (Quantites.Any())
             {
-                case 1:
-                    total += taux * 8;
-                    break;
-                case 2:
-                    taux = 0.95m;
-                    total += 2*taux*8;
-                    break;
-                case 3:
-                    taux = 0.90m;
-                    total += 3*taux*8;
-                    break;
-            }
+                var valeurs = Quantites.Select(kv => kv.Value).ToList();
+                var reductionnables = valeurs.Count(v => v >= 1);
+      
 
+                var taux = 1m;
+                switch (reductionnables)
+                {
+                    case 1:
+                        total += taux*8;
+                        break;
+                    case 2:
+                        taux = 0.95m;
+                        total += 2*taux*8;
+                        break;
+                    case 3:
+                        taux = 0.90m;
+                        total += 3*taux*8;
+                        break;
+                }
+
+                Quantites =
+                    Quantites.Select(kv => new KeyValuePair<int, int>(kv.Key, kv.Value - 1))
+                        .Where(kv => kv.Value > 0)
+                        .ToDictionary(kv => kv.Key, kv => kv.Value);
+            }
             return total;
         }
     }

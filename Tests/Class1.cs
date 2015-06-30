@@ -74,51 +74,56 @@ namespace Tests
 
     public class Calculatrice
     {
-        public Dictionary<int,int> Quantites { get; set; }
+        public List<Item> Panier { get; set; }
 
         public Calculatrice()
         {
-            Quantites = new Dictionary<int, int>();
+            Panier = new List<Item>();
         }
 
         public void Acheter(int id, int quantite)
         {
-            Quantites[id] = quantite;
+            Panier.Add(new Item(id, quantite));
         }
 
         public decimal CalculerTotal()
         {
-           
+            var reductions = new[]
+            {
+                 new {Nombre = 0, Taux = 0m},
+                new {Nombre = 1, Taux = 1m},
+                new {Nombre = 2, Taux = 0.95m},
+                new {Nombre = 3, Taux = 0.90m},
+
+            };
 
             var total = 0m;
-            while (Quantites.Any())
+            while (Panier.Any())
             {
-                var valeurs = Quantites.Select(kv => kv.Value).ToList();
-                var reductionnables = valeurs.Count(v => v >= 1);
-      
+                var valeurs = Panier.Select(item => item.Quantite).ToList();
+                var quantite = valeurs.Count(v => v >= 1);
 
-                var taux = 1m;
-                switch (reductionnables)
-                {
-                    case 1:
-                        total += taux*8;
-                        break;
-                    case 2:
-                        taux = 0.95m;
-                        total += 2*taux*8;
-                        break;
-                    case 3:
-                        taux = 0.90m;
-                        total += 3*taux*8;
-                        break;
-                }
+                var reduc = reductions.First(r => r.Nombre == quantite).Taux;
 
-                Quantites =
-                    Quantites.Select(kv => new KeyValuePair<int, int>(kv.Key, kv.Value - 1))
-                        .Where(kv => kv.Value > 0)
-                        .ToDictionary(kv => kv.Key, kv => kv.Value);
+                total = total + reduc*quantite*8;
+
+                Panier =
+                    Panier.Select(item => new Item(item.Id, item.Quantite - 1))
+                        .Where(item => item.Quantite > 0).ToList();
             }
             return total;
+        }
+
+    }
+
+    public class Item {
+        public int Id { get; set; }
+        public int Quantite { get; set; }
+
+        public Item(int id, int quantite)
+        {
+            Id = id;
+            Quantite = quantite;
         }
     }
 }

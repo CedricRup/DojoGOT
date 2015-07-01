@@ -12,8 +12,8 @@
 Scenario: Validation de l'exercice
 	Given j'ai acheté "2" exemplaires du livre numéro "1"
 	And j'ai acheté "2" exemplaires du livre numéro "2"
-	And j'ai acheté "3" exemplaires du livre numéro "3"
+	And j'ai acheté "2" exemplaires du livre numéro "3"
     And j'ai acheté "1" exemplaires du livre numéro "4"
 	And j'ai acheté "1" exemplaires du livre numéro "5"
 	When je passe à la caisse
-	Then le cout total est de "51,20€"
+	Then le cout total est de 51.20€

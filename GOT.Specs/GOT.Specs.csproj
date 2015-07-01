@@ -61,6 +61,12 @@
       <LastGenOutput>Rules1.feature.cs</LastGenOutput>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\GOT\GOT.csproj">
+      <Project>{EB025855-0A67-4651-83CF-07E30DA00F68}</Project>
+      <Name>GOT</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

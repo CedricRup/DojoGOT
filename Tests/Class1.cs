@@ -14,7 +14,7 @@ namespace Tests
             var calculatrice = new Calculatrice();
             calculatrice.Acheter(1, 0);
 
-            Assert.That(calculatrice.CalculerTotal(), Is.EqualTo(0m));
+            Assert.That(calculatrice.OptimiserTotal(), Is.EqualTo(0m));
         }
 
         [Test]
@@ -23,7 +23,7 @@ namespace Tests
             var calculatrice = new Calculatrice();
             calculatrice.Acheter(1, 1);
 
-            Assert.That(calculatrice.CalculerTotal(), Is.EqualTo(8m));
+            Assert.That(calculatrice.OptimiserTotal(), Is.EqualTo(8m));
         }
 
         [Test]
@@ -33,7 +33,7 @@ namespace Tests
             calculatrice.Acheter(1, 1);
             calculatrice.Acheter(2, 1);
 
-            Assert.That(calculatrice.CalculerTotal(), Is.EqualTo(15.20m));
+            Assert.That(calculatrice.OptimiserTotal(), Is.EqualTo(15.20m));
         }
 
         [Test]
@@ -42,7 +42,7 @@ namespace Tests
             var calculatrice = new Calculatrice();
             calculatrice.Acheter(1, 2);
 
-            Assert.That(calculatrice.CalculerTotal(), Is.EqualTo(16m));
+            Assert.That(calculatrice.OptimiserTotal(), Is.EqualTo(16m));
         }
 
         [Test]
@@ -53,7 +53,7 @@ namespace Tests
             calculatrice.Acheter(2, 1);
             calculatrice.Acheter(3, 1);
 
-            Assert.That(calculatrice.CalculerTotal(), Is.EqualTo(21.60m));
+            Assert.That(calculatrice.OptimiserTotal(), Is.EqualTo(21.60m));
         }
 
         [Test]
@@ -63,7 +63,7 @@ namespace Tests
             calculatrice.Acheter(1, 2);
             calculatrice.Acheter(2, 1);
 
-            Assert.That(calculatrice.CalculerTotal(), Is.EqualTo(23.20m));
+            Assert.That(calculatrice.OptimiserTotal(), Is.EqualTo(23.20m));
         }
 
         [Test]
@@ -75,7 +75,7 @@ namespace Tests
             calculatrice.Acheter(3, 1);
             calculatrice.Acheter(4, 1);
 
-            Assert.That(calculatrice.CalculerTotal(), Is.EqualTo(25.60m));
+            Assert.That(calculatrice.OptimiserTotal(), Is.EqualTo(25.60m));
         }
 
         [Test]
@@ -88,7 +88,7 @@ namespace Tests
             calculatrice.Acheter(4, 1);
             calculatrice.Acheter(5, 1);
 
-            Assert.That(calculatrice.CalculerTotal(), Is.EqualTo(30m));
+            Assert.That(calculatrice.OptimiserTotal(), Is.EqualTo(30m));
         }
 
         [Test]
@@ -101,15 +101,24 @@ namespace Tests
             calculatrice.Acheter(4, 1);
             calculatrice.Acheter(5, 1);
 
-            Assert.That(calculatrice.CalculerTotal(), Is.EqualTo(51.20m));
+            Assert.That(calculatrice.OptimiserTotal(), Is.EqualTo(51.20m));
         }
     }
 
     public class Calculatrice
     {
+        private readonly Reduction[] _reductions;
+
         public Calculatrice()
         {
             Panier = new List<Item>();
+            _reductions = new[]
+            {
+                new Reduction(2, 0.95m),
+                new Reduction(3, 0.90m),
+                new Reduction(4, 0.80m),
+                new Reduction(5, 0.75m)
+            };
         }
 
         public List<Item> Panier { get; set; }
@@ -119,50 +128,59 @@ namespace Tests
             Panier.Add(new Item(id, quantite));
         }
 
-        public decimal CalculerTotal()
+        public decimal OptimiserTotal()
         {
-            List<Item> items = Panier;
-            var reductions = new[]
-            {
-                new Reduction(2, 0.95m),
-                new Reduction(3, 0.90m),
-                new Reduction(4, 0.80m),
-                new Reduction(5, 0.75m)
-            };
-
-            return CalculerTotal(items, reductions);
+            return OptimiserTotal(Panier, _reductions.ToList());
         }
 
-        private static decimal CalculerTotal(List<Item> items, Reduction[] reductions)
+        private static decimal OptimiserTotal(IEnumerable<Item> livres, List<Reduction> reductions)
         {
-            items = items.Where(i => i.Quantite > 0).ToList();
+            var livresNonVide = EliminerLesQuantitesVides(livres);
 
-            if (!items.Any()) return 0m;
+            if (!livresNonVide.Any()) return 0m;
 
-            List<int> valeurs = items.Select(item => item.Quantite).ToList();
-            int quantite = valeurs.Count(v => v >= 1);
+            var totalSansLaProchaineReduction = CalculerTotalSansLaProchaineReduction(livresNonVide, reductions);
+            var totalAvecLaProchaineReduction = TotalAvecLaProchaineReduction(livresNonVide, reductions);
 
-            decimal alt = Decimal.MaxValue;
+            return Math.Min(totalSansLaProchaineReduction, totalAvecLaProchaineReduction);
+        }
 
-            if (reductions.Any())
+        private static List<Item> EliminerLesQuantitesVides(IEnumerable<Item> livres)
+        {
+            return livres.Where(i => i.Quantite > 0).ToList();
+        }
+
+        private static decimal TotalAvecLaProchaineReduction(List<Item> livres, List<Reduction> reductions)
+        {
+            var reduction = TrouverReduction(livres, reductions);
+            var livresRestants = EliminerLivresUtilises(livres, reduction);
+            return reduction.Taux * reduction.Nombre * 8 + OptimiserTotal(livresRestants, reductions);
+        }
+
+        private static decimal CalculerTotalSansLaProchaineReduction(IEnumerable<Item> livres, List<Reduction> reductions)
+        {
+            return reductions.Any() ? OptimiserTotal(livres, reductions.Skip(1).ToList()) : Decimal.MaxValue;
+        }
+
+        private static IEnumerable<Item> EliminerLivresUtilises(IEnumerable<Item> livres, Reduction reduction)
+        {
+            var livresRestants = new List<Item>();
+            var quantiteTotaleARetrancher = reduction.Nombre;
+
+            foreach (var item in livres)
             {
-                alt = CalculerTotal(items, reductions.Skip(1).ToArray());
+                var aSoustraire = quantiteTotaleARetrancher > 0 ? 1 : 0;
+                livresRestants.Add(new Item(item.Id,  item.Quantite - aSoustraire));
+                quantiteTotaleARetrancher--;
             }
+            return livresRestants;
+        }
 
-            var reduction = reductions.FirstOrDefault(r => quantite >= r.Nombre) ?? new Reduction(1, 1);
-            decimal reduc = reduction.Taux;
-
-            var quantiteARetrancher = reduction.Nombre;
-
-            List<Item> newitems = new List<Item>();
-            foreach (var item in items)
-            {
-                newitems.Add(new Item(item.Id, quantiteARetrancher > 0 ? item.Quantite - 1 : item.Quantite ));
-                quantiteARetrancher--;
-
-            }
-            
-            return Math.Min(alt, reduc*reduction.Nombre*8 + CalculerTotal(newitems, reductions));
+        private static Reduction TrouverReduction(IEnumerable<Item> items, IEnumerable<Reduction> reductions)
+        {
+            var nombreDeLivresDifferents = items.Count();
+            var reduction = reductions.FirstOrDefault(r => nombreDeLivresDifferents >= r.Nombre) ?? new Reduction(1, 1);
+            return reduction;
         }
 
         public class Reduction

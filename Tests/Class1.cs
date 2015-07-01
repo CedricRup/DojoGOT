@@ -124,8 +124,6 @@ namespace Tests
             List<Item> items = Panier;
             var reductions = new[]
             {
-                new Reduction(0, 0m),
-                new Reduction(1, 1m),
                 new Reduction(2, 0.95m),
                 new Reduction(3, 0.90m),
                 new Reduction(4, 0.80m),
@@ -137,25 +135,34 @@ namespace Tests
 
         private static decimal CalculerTotal(List<Item> items, Reduction[] reductions)
         {
+            items = items.Where(i => i.Quantite > 0).ToList();
+
             if (!items.Any()) return 0m;
 
             List<int> valeurs = items.Select(item => item.Quantite).ToList();
             int quantite = valeurs.Count(v => v >= 1);
 
-            decimal alt = 0m;
-            //if (quantite == 5 && reductions.Count() == 6)
-            //{
-            //    alt = CalculerTotal(items, reductions.Where(r => r.Nombre != 5).ToArray());
-            //}
+            decimal alt = Decimal.MaxValue;
 
-            decimal reduc = reductions.First(r => r.Nombre == quantite).Taux;
+            if (reductions.Any())
+            {
+                alt = CalculerTotal(items, reductions.Skip(1).ToArray());
+            }
 
-            List<Item> newitems =
-                items.Select(item => new Item(item.Id, item.Quantite - 1))
-                    .Where(item => item.Quantite > 0).ToList();
+            var reduction = reductions.FirstOrDefault(r => quantite >= r.Nombre) ?? new Reduction(1, 1);
+            decimal reduc = reduction.Taux;
 
+            var quantiteARetrancher = reduction.Nombre;
 
-            return Math.Max(alt, reduc*quantite*8 + CalculerTotal(newitems, reductions));
+            List<Item> newitems = new List<Item>();
+            foreach (var item in items)
+            {
+                newitems.Add(new Item(item.Id, quantiteARetrancher > 0 ? item.Quantite - 1 : item.Quantite ));
+                quantiteARetrancher--;
+
+            }
+            
+            return Math.Min(alt, reduc*reduction.Nombre*8 + CalculerTotal(newitems, reductions));
         }
 
         public class Reduction
